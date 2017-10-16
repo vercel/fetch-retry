@@ -27,7 +27,7 @@ const fetchRetry = (url, opts = {}, retryOpts) => (
       debug('status %d', res.status);
       if (res.status >= 500 && res.status < 600) {
         const err = new Error(res.statusText);
-        err.status = err.statusCode = res.status;
+        err.code = err.status = err.statusCode = res.status;
         err.url = url;
         throw err;
       } else {
