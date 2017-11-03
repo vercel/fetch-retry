@@ -1,3 +1,4 @@
+const {HttpsAgent} = require('agentkeepalive');
 const retry = require('async-retry');
 const debug = require('debug')('fetch-retry');
 
@@ -8,12 +9,21 @@ const FACTOR = 5;
 
 module.exports = setup;
 
+const defaultAgent = new HttpsAgent({
+  maxSockets: 200,
+  maxFreeSockets: 20,
+  timeout: 60000,
+  freeSocketKeepAliveTimeout: 30000 // free socket keepalive for 30 seconds
+});
+
 function setup(fetch) {
   if (!fetch) {
     fetch = require('node-fetch');
   }
 
   function fetchRetry(url, opts = {}, retryOpts) {
+    opts.agent = opts.agent || defaultAgent;
+
     return retry(async (bail, attempt) => {
       const {method = 'GET'} = opts;
       try {
