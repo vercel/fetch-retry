@@ -5,6 +5,10 @@ A layer on top of `fetch` with sensible defaults for retrying to prevent common 
 
 [![Build Status](https://travis-ci.org/geoffdutton/fetch-retry.svg?branch=master)](https://travis-ci.org/geoffdutton/fetch-retry)
 [![Coverage Status](https://coveralls.io/repos/github/geoffdutton/fetch-retry/badge.svg?branch=master)](https://coveralls.io/github/geoffdutton/fetch-retry?branch=master)
+[![javascript style guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.comr)
+![](https://img.shields.io/david/geoffdutton/fetch-retry.svg?style=flat)
+[![Known Vulnerabilities](https://snyk.io/test/github/geoffdutton/fetch-retry/badge.svg)](https://snyk.io/test/github/geoffdutton/fetch-retry)
+
 
 ## How to use
 
