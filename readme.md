@@ -1,14 +1,14 @@
 # fetch-retry
 
-A layer on top of `fetch` (via [node-fetch](https://www.npmjs.com/package/node-fetch))
-with sensible defaults for retrying to prevent common errors.
+Original Credit: [zeit/fetch-retry](https://github.com/zeit/fetch-retry)
+A layer on top of `fetch` with sensible defaults for retrying to prevent common errors.
 
 ## How to use
 
 `fetch-retry` is a drop-in replacement for `fetch`:
 
 ```js
-const fetch = require('@zeit/fetch-retry')(require('node-fetch'))
+const fetch = require('@geoffdutton/fetch-retry')(require('node-fetch'))
 
 module.exports = async () => {
   const res = await fetch('http://localhost:3000')
