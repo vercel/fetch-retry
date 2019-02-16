@@ -16,7 +16,17 @@ module.exports = async () => {
 }
 ```
 
-Make sure to `yarn add @zeit/fetch-retry` in your main package.
+```js
+// in the browser
+const fetch = require('@geoffdutton/fetch-retry')(window.fetch)
+
+module.exports = async () => {
+  const res = await fetch('http://localhost:3000')
+  console.log(res.status);
+}
+```
+
+Make sure to `yarn add @geoffdutton/fetch-retry` in your main package.
 
 Note that you can pass [retry options](https://github.com/zeit/async-retry) to using `opts.retry`.
 We also provide a `opts.onRetry` which is a customized version of `opts.retry.onRetry` and passes
@@ -45,5 +55,5 @@ in production.
 To run rests, execute
 
 ```console
-npm test
+yarn test
 ```

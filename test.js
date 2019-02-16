@@ -68,9 +68,42 @@ test('accepts a custom onRetry option', async () => {
       try {
         await retryFetch(`http://127.0.0.1:${port}`, opts)
       } catch (err) {
-        expect(opts.onRetry.mock.calls.length).toBe(3)
+        expect(opts.onRetry).toHaveBeenCalledTimes(3)
         expect(opts.onRetry.mock.calls[0][0]).toEqual(err)
         expect(opts.onRetry.mock.calls[0][1]).toEqual(opts)
+        expect(await err.status).toBe(500)
+        server.close()
+        return resolve()
+      }
+      reject(new Error('must fail'))
+    })
+    server.on('error', reject)
+  })
+})
+
+test('accepts a custom retry.onRetry option', async () => {
+  const server = createServer((req, res) => {
+    res.writeHead(500)
+    res.end()
+  })
+
+  return new Promise((resolve, reject) => {
+    const opts = {
+      onRetry: jest.fn(),
+      retry: {
+        onRetry: jest.fn()
+      }
+    }
+
+    server.listen(async () => {
+      const { port } = server.address()
+      try {
+        await retryFetch(`http://127.0.0.1:${port}`, opts)
+      } catch (err) {
+        expect(opts.onRetry).toHaveBeenCalledTimes(3)
+        expect(opts.onRetry).toHaveBeenCalledWith(err, opts)
+        expect(opts.retry.onRetry).toHaveBeenCalledTimes(3)
+        expect(opts.retry.onRetry).toHaveBeenCalledWith(err)
         expect(await err.status).toBe(500)
         server.close()
         return resolve()

@@ -9,8 +9,6 @@ const FACTOR = 5
 module.exports = setup
 
 function setup (fetch) {
-  fetch = fetch || window.fetch
-
   function fetchRetry (url, opts = {}) {
     const retryOpts = Object.assign({
       // timeouts will be [ 10, 50, 250 ]
