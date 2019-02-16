@@ -1,5 +1,14 @@
 
 const path = require('path')
+const IS_CI = 'TRAVIS' in process.env && 'CI' in process.env
+process.env.CHROME_BIN = require('puppeteer').executablePath()
+
+const browsers = ['Firefox']
+if (!IS_CI) {
+  browsers.push('Chrome')
+} else {
+  browsers.push('ChromeHeadless')
+}
 
 module.exports = function (config) {
   config.set({
@@ -19,9 +28,6 @@ module.exports = function (config) {
     },
     basePath: path.resolve(__dirname),
     frameworks: ['jasmine'],
-    browsers: [
-      'Chrome',
-      'Firefox'
-    ]
+    browsers
   })
 }
