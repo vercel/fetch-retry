@@ -3,6 +3,9 @@
 Original Credit: [zeit/fetch-retry](https://github.com/zeit/fetch-retry)
 A layer on top of `fetch` with sensible defaults for retrying to prevent common errors.
 
+[![Build Status](https://travis-ci.org/geoffdutton/fetch-retry.svg?branch=master)](https://travis-ci.org/geoffdutton/fetch-retry)
+[![Coverage Status](https://coveralls.io/repos/github/geoffdutton/fetch-retry/badge.svg?branch=master)](https://coveralls.io/github/geoffdutton/fetch-retry?branch=master)
+
 ## How to use
 
 `fetch-retry` is a drop-in replacement for `fetch`:
