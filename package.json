@@ -1,12 +1,21 @@
 {
   "name": "@geoffdutton/fetch-retry",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "license": "MIT",
   "devDependencies": {
     "coveralls": "^3.0.2",
+    "jasmine-core": "^3.3.0",
     "jest": "^24.1.0",
+    "karma": "^4.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^3.0.5",
     "node-fetch": "^1.7.3",
-    "standard": "^12.0.1"
+    "standard": "^12.0.1",
+    "webpack": "^4.29.4",
+    "webpack-cli": "^3.2.3"
   },
   "peerDependencies": {
     "node-fetch": "*"
@@ -15,7 +24,10 @@
     "async-retry": "^1.2.3"
   },
   "scripts": {
-    "test": "jest --coverage",
+    "build": "webpack -p",
+    "test": "standard . && jest --coverage && yarn test:browser",
+    "test:browser": "karma start --single-run",
+    "tdd:browser": "karma start --browsers Chrome",
     "tdd": "jest --watch",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
   }

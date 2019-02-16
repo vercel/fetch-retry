@@ -9,7 +9,9 @@ const FACTOR = 5
 module.exports = setup
 
 function setup (fetch) {
-  function fetchRetry (url, opts = {}) {
+  function fetchRetry (url, opts) {
+    opts = opts || {}
+    opts.method = opts.method || 'GET'
     const retryOpts = Object.assign({
       // timeouts will be [ 10, 50, 250 ]
       minTimeout: MIN_TIMEOUT,
@@ -27,7 +29,6 @@ function setup (fetch) {
     }
 
     return retry((bail, attempt) => {
-      const { method = 'GET' } = opts
       return fetch(url, opts)
         .then(res => {
           if (res.status >= 500 && res.status < 600) {
@@ -40,7 +41,7 @@ function setup (fetch) {
           }
         })
         .catch(err => {
-          debug(`${method} ${url} error (${err.status}). ${attempt < MAX_RETRIES ? 'retrying' : ''}`, err)
+          debug(opts.method, url, 'error (' + err.status + ').', attempt < MAX_RETRIES ? 'retrying' : 'not_retrying', err)
           throw err
         })
     }, retryOpts)
