@@ -13,6 +13,14 @@ function setup(fetch) {
     fetch = require('node-fetch');
   }
 
+  function retryHeader(opts, attempt) {
+    const {headers = {}} = opts;
+
+    headers['X-Retry-Attempt'] = attempt;
+
+    return {headers, ...opts};
+  }
+
   function fetchRetry(url, opts = {}) {
     const retryOpts = Object.assign({
       // timeouts will be [ 10, 50, 250 ]
@@ -35,7 +43,7 @@ function setup(fetch) {
       const isRetry = attempt < retryOpts.retries;
       try {
         // this will be retried
-        const res = await fetch(url, opts);
+        const res = await fetch(url, retryHeader(opts, attempt));
         debug('status %d', res.status);
         if (res.status >= 500 && res.status < 600 && isRetry) {
           const err = new Error(res.statusText);
