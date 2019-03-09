@@ -10,13 +10,14 @@ test('retries upon 500', async () => {
     } else {
       res.end('ha');
     }
+    expect(req.headers).toHaveProperty('x-retry-attempt', `${i}`);
   });
 
   return new Promise((resolve, reject) => {
     server.listen(async () => {
       const {port} = server.address();
       try {
-        const res = await retryFetch(`http://127.0.0.1:${port}`);
+        const res = await retryFetch(`http://127.0.0.1:${port}`, {headers: {'x-test': 1, 'x-retry-attempt': 100}});
         expect(await res.text()).toBe('ha');
         server.close();
         resolve();
