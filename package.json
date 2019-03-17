@@ -1,6 +1,6 @@
 {
-  "name": "@npmsoluto/fetch-retry",
-  "version": "4.1.0",
+  "name": "@zeit/fetch-retry",
+  "version": "4.0.0",
   "devDependencies": {
     "jest": "^21.2.1",
     "node-fetch": "^1.7.3"
