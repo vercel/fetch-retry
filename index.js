@@ -41,6 +41,8 @@ function setup(fetch) {
           const err = new Error(res.statusText);
           err.code = err.status = err.statusCode = res.status;
           err.url = url;
+          err.attempt = attempt;
+          err.responseText = await res.text();
           throw err;
         } else {
           return res;
