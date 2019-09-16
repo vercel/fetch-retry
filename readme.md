@@ -11,9 +11,19 @@ with sensible defaults for retrying to prevent common errors.
 const fetch = require('@zeit/fetch-retry')(require('node-fetch'))
 
 module.exports = async () => {
-  const res = await fetch('http://localhost:3000')
+  const res = await fetch('http://localhost:3000');
   console.log(res.status);
 }
+```
+
+In TypeScript:
+
+```typescirpt
+import createFetch = require('@zeit/fetch-retry');
+const fetch = createFetch();
+
+const res = await fetch('http://localhost:3000');
+console.log(res.status);
 ```
 
 Make sure to `yarn add @zeit/fetch-retry` in your main package.
