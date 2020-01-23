@@ -60,7 +60,7 @@ test('accepts a custom onRetry option', async () => {
     server.listen(async () => {
       const {port} = server.address();
       const res = await retryFetch(`http://127.0.0.1:${port}`, opts);
-      expect(opts.onRetry.mock.calls.length).toBe(2);
+      expect(opts.onRetry.mock.calls.length).toBe(4);
       expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(Error);
       expect(opts.onRetry.mock.calls[0][1]).toEqual(opts);
       expect(res.status).toBe(500);
