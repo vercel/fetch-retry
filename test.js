@@ -17,14 +17,15 @@ test('retries upon 500', async () => {
 
   return new Promise((resolve, reject) => {
     server.listen(async () => {
-      const {port} = server.address();
       try {
+        const {port} = server.address();
         const res = await retryFetch(`http://127.0.0.1:${port}`);
         expect(await res.text()).toBe('ha');
-        server.close();
         resolve();
       } catch (err) {
         reject(err);
+      } finally {
+        server.close();
       }
     });
     server.on('error', reject);
@@ -39,11 +40,14 @@ test('resolves on >MAX_RETRIES', async () => {
 
   return new Promise((resolve, reject) => {
     server.listen(async () => {
-      const {port} = server.address();
-      const res = await retryFetch(`http://127.0.0.1:${port}`);
-      expect(res.status).toBe(500);
-      server.close();
-      return resolve();
+      try {
+        const {port} = server.address();
+        const res = await retryFetch(`http://127.0.0.1:${port}`);
+        expect(res.status).toBe(500);
+        return resolve();
+      } finally {
+        server.close();
+      }
     });
     server.on('error', reject);
   });
@@ -61,14 +65,17 @@ test('accepts a custom onRetry option', async () => {
     }
 
     server.listen(async () => {
-      const {port} = server.address();
-      const res = await retryFetch(`http://127.0.0.1:${port}`, opts);
-      expect(opts.onRetry.mock.calls.length).toBe(4);
-      expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError);
-      expect(opts.onRetry.mock.calls[0][1]).toEqual(opts);
-      expect(res.status).toBe(500);
-      server.close();
-      return resolve();
+      try {
+        const {port} = server.address();
+        const res = await retryFetch(`http://127.0.0.1:${port}`, opts);
+        expect(opts.onRetry.mock.calls.length).toBe(4);
+        expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError);
+        expect(opts.onRetry.mock.calls[0][1]).toEqual(opts);
+        expect(res.status).toBe(500);
+        return resolve();
+      } finally {
+        server.close();
+      }
     });
     server.on('error', reject);
   });
