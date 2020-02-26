@@ -1,5 +1,8 @@
 const {createServer} =  require('http');
-const retryFetch = require('./index')();
+const setup = require('./index');
+
+const { ResponseError } = setup;
+const retryFetch = setup();
 
 test('retries upon 500', async () => {
   let i = 0
@@ -60,8 +63,8 @@ test('accepts a custom onRetry option', async () => {
     server.listen(async () => {
       const {port} = server.address();
       const res = await retryFetch(`http://127.0.0.1:${port}`, opts);
-      expect(opts.onRetry.mock.calls.length).toBe(2);
-      expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(Error);
+      expect(opts.onRetry.mock.calls.length).toBe(4);
+      expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError);
       expect(opts.onRetry.mock.calls[0][1]).toEqual(opts);
       expect(res.status).toBe(500);
       server.close();
