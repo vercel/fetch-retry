@@ -38,7 +38,12 @@ function setup(fetch) {
           // this will be retried
           const res = await fetch(url, opts);
           debug('status %d', res.status);
-          if (res.status >= 500 && res.status < 600) {
+          if ((res.status >= 500 && res.status < 600) || res.status === 429) {
+            // NOTE: doesn't support http-date format
+            const retryAfter = parseInt(res.headers.get('retry-after'), 10);
+            if (retryAfter) {
+              await new Promise(r => setTimeout(r, retryAfter * 1e3));
+            }
             throw new ResponseError(res);
           } else {
             return res;

@@ -87,3 +87,32 @@ test('accepts a custom onRetry option', async () => {
     server.on('error', reject);
   });
 })
+
+test('handle the Retry-After header', async () => {
+  const server = createServer((req, res) => {
+    res.writeHead(429, { 'Retry-After': 1 });
+    res.end();
+  });
+
+  return new Promise((resolve, reject) => {
+    server.listen(async () => {
+      const {port} = server.address();
+      try {
+        const startedAt = Date.now();
+        const res = await retryFetch(`http://127.0.0.1:${port}`, {
+          retry: {
+            minTimeout: 10,
+            retries: 1
+          }
+        });
+        expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1010);
+        resolve();
+      } catch (err) {
+        reject(err);
+      } finally {
+        server.close();
+      }
+    });
+    server.on('error', reject);
+  });
+});
