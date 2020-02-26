@@ -68,6 +68,11 @@ function setup(fetch) {
 class ResponseError extends Error {
   constructor(res) {
     super(res.statusText);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ResponseError);
+    }
+
     this.name = this.constructor.name;
     this.res = res;
 
