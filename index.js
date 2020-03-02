@@ -4,6 +4,7 @@ const debug = require('debug')('fetch-retry');
 // retry settings
 const MIN_TIMEOUT = 10;
 const MAX_RETRIES = 5;
+const MAX_RETRY_AFTER = 20;
 const FACTOR = 6;
 
 module.exports = exports = setup;
@@ -20,6 +21,7 @@ function setup(fetch) {
       minTimeout: MIN_TIMEOUT,
       retries: MAX_RETRIES,
       factor: FACTOR,
+      maxRetryAfter: MAX_RETRY_AFTER,
     }, opts.retry);
 
     if (opts.onRetry) {
@@ -42,7 +44,11 @@ function setup(fetch) {
             // NOTE: doesn't support http-date format
             const retryAfter = parseInt(res.headers.get('retry-after'), 10);
             if (retryAfter) {
-              await new Promise(r => setTimeout(r, retryAfter * 1e3));
+              if (retryAfter > retryOpts.maxRetryAfter) {
+                return res;
+              } else {
+                await new Promise(r => setTimeout(r, retryAfter * 1e3));
+              }
             }
             throw new ResponseError(res);
           } else {
