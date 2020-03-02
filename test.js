@@ -42,7 +42,11 @@ test('resolves on >MAX_RETRIES', async () => {
     server.listen(async () => {
       try {
         const {port} = server.address();
-        const res = await retryFetch(`http://127.0.0.1:${port}`);
+        const res = await retryFetch(`http://127.0.0.1:${port}`, {
+          retry: {
+            retries: 3
+          }
+        });
         expect(res.status).toBe(500);
         return resolve();
       } finally {
@@ -61,14 +65,17 @@ test('accepts a custom onRetry option', async () => {
 
   return new Promise((resolve, reject) => {
     const opts = {
-      onRetry: jest.fn()
+      onRetry: jest.fn(),
+      retry: {
+        retries: 3
+      }
     }
 
     server.listen(async () => {
       try {
         const {port} = server.address();
         const res = await retryFetch(`http://127.0.0.1:${port}`, opts);
-        expect(opts.onRetry.mock.calls.length).toBe(4);
+        expect(opts.onRetry.mock.calls.length).toBe(3);
         expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError);
         expect(opts.onRetry.mock.calls[0][1]).toEqual(opts);
         expect(res.status).toBe(500);

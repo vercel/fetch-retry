@@ -29,12 +29,12 @@ yielding `ECONNRESET`), and can easily and instantly be remediated
 by retrying.
 
 The default behavior of `fetch-retry` is to attempt retries **10**, **60**
-**360** and **2160** milliseconds (a total of 4 retries) after
+**360**, **2160** and **12960** milliseconds (a total of 5 retries) after
 a *network error* or *5xx* error occur.
 
 The idea is to provide a sensible default: most applications should
 continue to perform correctly with a worst case scenario of a given
-request having an additional 2160ms overhead. 
+request having an additional 15550ms overhead.
 
 On the other hand, most applications that use `fetch-retry` instead of
 vanilla `fetch` should see lower rates of common errors and fewer 'glitches'
