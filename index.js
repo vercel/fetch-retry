@@ -14,10 +14,6 @@ const wait = retryAfter =>
   new Promise(r => setTimeout(r, retryAfter * 1e3))
 
 function setup (fetch) {
-  if (!fetch) {
-    fetch = require('node-fetch')
-  }
-
   async function fetchRetry (url, opts = {}) {
     const retryOpts = Object.assign({
       // timeouts will be [10, 60, 360, 2160, 12960]

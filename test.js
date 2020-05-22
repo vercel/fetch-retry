@@ -3,7 +3,7 @@ const { createServer } = require('http')
 const setup = require('./index')
 
 const { ResponseError } = setup
-const retryFetch = setup()
+const retryFetch = setup(require('node-fetch'))
 
 let server
 afterEach(() => {
@@ -191,7 +191,7 @@ test('throws non ResponseError', async () => {
     }
   }
   try {
-    await setup(require('node-fetch'))(`http://127.0.0.1:${port}`, opts)
+    await retryFetch(`http://127.0.0.1:${port}`, opts)
   } catch (e) {
     err = e
   }
