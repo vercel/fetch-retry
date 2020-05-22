@@ -1,6 +1,6 @@
 {
   "name": "@geoffdutton/fetch-retry",
-  "version": "3.1.1",
+  "version": "5.0.0",
   "license": "MIT",
   "main": "/dist/fetch-retry.js",
   "devDependencies": {
@@ -23,7 +23,8 @@
     "node-fetch": "*"
   },
   "dependencies": {
-    "async-retry": "^1.2.3"
+    "async-retry": "^1.3.1",
+    "debug": "^3.1.0"
   },
   "scripts": {
     "build": "webpack -p",

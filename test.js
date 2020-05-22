@@ -1,11 +1,21 @@
-/* globals test, jest, expect */
-
+/* globals test, afterEach, jest, expect */
 const { createServer } = require('http')
-const retryFetch = require('./index')(require('node-fetch'))
+const setup = require('./index')
+
+const { ResponseError } = setup
+const retryFetch = setup()
+
+let server
+afterEach(() => {
+  if (server) {
+    server.close()
+  }
+  server = null
+})
 
 test('retries upon 500', async () => {
   let i = 0
-  const server = createServer((req, res) => {
+  server = createServer((req, res) => {
     if (i++ < 2) {
       res.writeHead(500)
       res.end()
@@ -16,11 +26,10 @@ test('retries upon 500', async () => {
 
   return new Promise((resolve, reject) => {
     server.listen(async () => {
-      const { port } = server.address()
       try {
+        const { port } = server.address()
         const res = await retryFetch(`http://127.0.0.1:${port}`)
         expect(await res.text()).toBe('ha')
-        server.close()
         resolve()
       } catch (err) {
         reject(err)
@@ -30,9 +39,96 @@ test('retries upon 500', async () => {
   })
 })
 
-test('fails on >MAX_RETRIES', async () => {
-  const server = createServer((req, res) => {
+test('resolves on >MAX_RETRIES', async () => {
+  server = createServer((req, res) => {
     res.writeHead(500)
+    res.end()
+  })
+
+  return new Promise((resolve, reject) => {
+    server.listen(async () => {
+      try {
+        const { port } = server.address()
+        const res = await retryFetch(`http://127.0.0.1:${port}`, {
+          retry: {
+            retries: 3
+          }
+        })
+        expect(res.status).toBe(500)
+        return resolve()
+      } catch (err) {
+        reject(err)
+      }
+    })
+    server.on('error', reject)
+  })
+})
+
+test('accepts a custom onRetry option', async () => {
+  server = createServer((req, res) => {
+    res.writeHead(500)
+    res.end()
+  })
+
+  return new Promise((resolve, reject) => {
+    const opts = {
+      onRetry: jest.fn(),
+      retry: {
+        retries: 3
+      }
+    }
+
+    server.listen(async () => {
+      const { port } = server.address()
+      const res = await retryFetch(`http://127.0.0.1:${port}`, opts)
+      expect(opts.onRetry).toHaveBeenCalledTimes(3)
+      expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError)
+      expect(opts.onRetry.mock.calls[0][1]).toEqual(opts)
+      expect(await res.status).toBe(500)
+      resolve()
+    })
+    server.on('error', reject)
+  })
+})
+
+test('accepts a custom retry.onRetry option', () => {
+  server = createServer((req, res) => {
+    res.writeHead(500)
+    res.end()
+  })
+
+  return new Promise((resolve, reject) => {
+    const opts = {
+      onRetry: jest.fn(),
+      retry: {
+        retries: 2,
+        onRetry: jest.fn()
+      }
+    }
+
+    server.listen(async () => {
+      try {
+        const { port } = server.address()
+
+        const res = await retryFetch(`http://127.0.0.1:${port}`, opts)
+        expect(opts.onRetry).toHaveBeenCalledTimes(2)
+        expect(opts.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError)
+        expect(opts.onRetry.mock.calls[0][1]).toEqual(opts)
+        expect(opts.retry.onRetry).toHaveBeenCalledTimes(2)
+        expect(opts.retry.onRetry.mock.calls[0][0]).toBeInstanceOf(ResponseError)
+        expect(await res.status).toBe(500)
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
+    server.on('error', reject)
+  })
+})
+
+test('handles the Retry-After header', async () => {
+  server = createServer((req, res) => {
+    res.writeHead(429, { 'Retry-After': 1 })
     res.end()
   })
 
@@ -40,21 +136,27 @@ test('fails on >MAX_RETRIES', async () => {
     server.listen(async () => {
       const { port } = server.address()
       try {
-        await retryFetch(`http://127.0.0.1:${port}`)
+        const startedAt = Date.now()
+        const res = await retryFetch(`http://127.0.0.1:${port}`, {
+          retry: {
+            minTimeout: 10,
+            retries: 1
+          }
+        })
+        expect(res.status).toBe(429)
+        expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1010)
+        resolve()
       } catch (err) {
-        expect(await err.status).toBe(500)
-        server.close()
-        return resolve()
+        reject(err)
       }
-      reject(new Error('must fail'))
     })
     server.on('error', reject)
   })
 })
 
-test('accepts a custom onRetry option', async () => {
-  const server = createServer((req, res) => {
-    res.writeHead(500)
+test('stops retrying when the Retry-After header exceeds the maxRetryAfter option', async () => {
+  server = createServer((req, res) => {
+    res.writeHead(429, { 'Retry-After': 21 })
     res.end()
   })
 
@@ -66,50 +168,33 @@ test('accepts a custom onRetry option', async () => {
     server.listen(async () => {
       const { port } = server.address()
       try {
-        await retryFetch(`http://127.0.0.1:${port}`, opts)
+        const res = await retryFetch(`http://127.0.0.1:${port}`, opts)
+        expect(opts.onRetry.mock.calls.length).toBe(0)
+        expect(res.status).toBe(429)
+        resolve()
       } catch (err) {
-        expect(opts.onRetry).toHaveBeenCalledTimes(3)
-        expect(opts.onRetry.mock.calls[0][0]).toEqual(err)
-        expect(opts.onRetry.mock.calls[0][1]).toEqual(opts)
-        expect(await err.status).toBe(500)
-        server.close()
-        return resolve()
+        reject(err)
       }
-      reject(new Error('must fail'))
     })
     server.on('error', reject)
   })
 })
 
-test('accepts a custom retry.onRetry option', async () => {
-  const server = createServer((req, res) => {
-    res.writeHead(500)
-    res.end()
-  })
-
-  return new Promise((resolve, reject) => {
-    const opts = {
-      onRetry: jest.fn(),
-      retry: {
-        onRetry: jest.fn()
-      }
+test('throws non ResponseError', async () => {
+  let err
+  const port = 84934
+  const opts = {
+    retry: {
+      retries: 1,
+      factor: 1,
+      maxTimeout: 20
     }
+  }
+  try {
+    await setup(require('node-fetch'))(`http://127.0.0.1:${port}`, opts)
+  } catch (e) {
+    err = e
+  }
 
-    server.listen(async () => {
-      const { port } = server.address()
-      try {
-        await retryFetch(`http://127.0.0.1:${port}`, opts)
-      } catch (err) {
-        expect(opts.onRetry).toHaveBeenCalledTimes(3)
-        expect(opts.onRetry).toHaveBeenCalledWith(err, opts)
-        expect(opts.retry.onRetry).toHaveBeenCalledTimes(3)
-        expect(opts.retry.onRetry).toHaveBeenCalledWith(err)
-        expect(await err.status).toBe(500)
-        server.close()
-        return resolve()
-      }
-      reject(new Error('must fail'))
-    })
-    server.on('error', reject)
-  })
+  expect(err.code).toBe('ERR_SOCKET_BAD_PORT')
 })
