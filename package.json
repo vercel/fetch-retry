@@ -2,6 +2,7 @@
   "name": "@geoffdutton/fetch-retry",
   "version": "3.1.1",
   "license": "MIT",
+  "main": "/dist/fetch-retry.js",
   "devDependencies": {
     "coveralls": "^3.0.2",
     "jasmine-core": "^3.3.0",
@@ -31,5 +32,9 @@
     "tdd:browser": "karma start --browsers Chrome",
     "tdd": "jest --watch",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
-  }
+  },
+  "files": [
+    "/dist",
+    "/yarn.lock"
+  ]
 }
