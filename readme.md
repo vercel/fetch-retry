@@ -1,4 +1,4 @@
-# fetch-retry [![CircleCI](https://circleci.com/gh/zeit/fetch-retry.svg?style=svg)](https://circleci.com/gh/zeit/fetch-retry)
+# fetch-retry
 
 Original Credit: [zeit/fetch-retry](https://github.com/zeit/fetch-retry)
 A layer on top of `fetch` with sensible defaults for retrying to prevent common errors.
