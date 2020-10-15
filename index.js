@@ -9,6 +9,11 @@ const FACTOR = 6;
 
 module.exports = exports = setup;
 
+function isClientError(err) {
+  if (!err) return false;
+  return err.code === 'ERR_UNESCAPED_CHARACTERS' || err.message === 'Request path contains unescaped characters';
+}
+
 function setup(fetch) {
   if (!fetch) {
     fetch = require('node-fetch');
@@ -55,10 +60,10 @@ function setup(fetch) {
             return res;
           }
         } catch (err) {
-          const isClientError = err && err.code === 'ERR_UNESCAPED_CHARACTERS';
-          const isRetry = !isClientError && attempt <= retryOpts.retries;
+          const clientError = isClientError(err);
+          const isRetry = !clientError && attempt <= retryOpts.retries;
           debug(`${method} ${url} error (status = ${err.status}). ${isRetry ? 'retrying' : ''}`, err);
-          if (isClientError) {
+          if (clientError) {
             return bail(err);
           }
           throw err;
