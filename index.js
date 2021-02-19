@@ -49,7 +49,8 @@ function setup(fetch) {
         const { method = 'GET' } = opts;
         try {
           // this will be retried
-          const res = await fetch(url, opts);
+          const { retry, onRetry, ...fetchOpts } = opts;
+          const res = await fetch(url, fetchOpts);
           debug('status %d', res.status);
           if ((res.status >= 500 && res.status < 600) || res.status === 429) {
             // NOTE: doesn't support http-date format
