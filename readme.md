@@ -1,6 +1,6 @@
 # fetch-retry
 
-[![Build Status](https://github.com/zeit/fetch-retry/workflows/Node%20CI/badge.svg)](https://github.com/zeit/fetch-retry/actions?workflow=Node+CI)
+**This repo has been archived and the source has been moved to [vercel/fetch](https://github.com/vercel/fetch) monorepo**
 
 A layer on top of `fetch` (via [node-fetch](https://www.npmjs.com/package/node-fetch))
 with sensible defaults for retrying to prevent common errors.
